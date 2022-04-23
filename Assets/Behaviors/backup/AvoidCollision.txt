@@ -1,0 +1,44 @@
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class AvoidCollision : Behavior
+{
+    Rigidbody2D rb;
+    Steerer steerer; 
+    public float avoidDist = 1f;
+    public float avoidWidth= .25f;
+    public float maxSpeed = 1f;
+
+    BehaviorHolder holder;
+    // Start is called before the first frame update
+    void Start()
+    {
+        holder = GetComponent<BehaviorHolder>();
+        rb = holder.RB;
+        steerer = holder.Steerer;
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+    }
+
+    public override void Behave(float weight)
+    {
+        DoAvoidCollision(holder, transform.position, rb, steerer, avoidWidth, avoidDist, weight);
+    }
+
+    public static void DoAvoidCollision (BehaviorHolder holder, Vector3 callerPos, Rigidbody2D callerRB, Steerer steerer, float avoidWidth, float avoidDist, float speed)
+    {
+        Collider2D[] cols = Methods.GetCollidersInBox(callerPos, callerRB, avoidWidth, avoidDist);
+        if (cols.Length > 0)
+        {
+            Collider2D col = Methods.FindClosestCollider(callerPos, cols);
+            Methods.SteerAwayFromCollider(holder, callerPos, callerRB, col, steerer, avoidDist, speed);
+        }
+    }
+
+
+    
+}

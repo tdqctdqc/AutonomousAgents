@@ -1,0 +1,50 @@
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class PursueArrive : Behavior
+{
+    Target target;
+    Crosshair crosshair;
+    Rigidbody2D rb;
+    Rigidbody2D targetRB;
+    Steerer steerer;
+    public float acceleration = 1f;
+    float maxSpeed = 5f;
+
+    public float slowingDistance = 1f;
+
+    BehaviorHolder holder;
+    // Start is called before the first frame update
+    void Start()
+    {
+        holder = GetComponent<BehaviorHolder>();
+        target = holder.Target;
+        if (target != null)
+        {
+            targetRB = holder.TargetRB;
+        }
+        rb = holder.RB;
+        crosshair = holder.Crosshair;
+        steerer = holder.Steerer;
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+    }
+    public override void Behave(float weight)
+    {
+        if (target != null)
+        {
+            DoPursueArrive(holder, transform.position, target.transform.position, rb, targetRB, steerer, crosshair, weight, slowingDistance);
+        }
+    }
+
+    public static void DoPursueArrive (BehaviorHolder holder, Vector3 callerPos, Vector3 targetPos, Rigidbody2D callerRB, Rigidbody2D targetRB, Steerer steerer, Crosshair crosshair, float speed, float slowingDist)
+    {
+        Vector3 tar = Methods.FindTargetFuturePos(callerRB, targetRB, callerPos, targetPos);
+        float clippedSpeed = Methods.ScaleSpeedWithDistance(callerPos, tar, speed, slowingDist);
+        Pursue.DoPursue(holder, callerPos, tar, callerRB, targetRB, clippedSpeed, steerer, crosshair); 
+    }
+}

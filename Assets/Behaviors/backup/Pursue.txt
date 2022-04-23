@@ -1,0 +1,49 @@
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class Pursue : Behavior
+{
+    Target target;
+    Crosshair crosshair; 
+    Rigidbody2D rb;
+    Rigidbody2D targetRB;
+    Steerer steerer;
+    public float acceleration = 1f;
+    float maxSpeed = 5f;
+    BehaviorHolder holder; 
+
+    // Start is called before the first frame update
+    void Start()
+    {
+        holder = GetComponent<BehaviorHolder>();
+        target = holder.Target;
+        if (target != null)
+        {
+            targetRB = holder.TargetRB;
+        }
+        rb = holder.RB;
+        crosshair = holder.Crosshair;
+        steerer = holder.Steerer;
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+    }
+
+    public override void Behave(float weight)
+    {
+        if (target != null)
+        {
+            DoPursue(holder, transform.position, target.transform.position, rb, targetRB, weight, steerer, crosshair);
+        }
+    }
+
+
+    public static void DoPursue (BehaviorHolder holder, Vector3 callerPos, Vector3 targetPos, Rigidbody2D callerRB, Rigidbody2D targetRB, float speed, Steerer steerer, Crosshair crosshair)
+    {
+        Methods.PursueEvade(holder, callerPos, targetPos, callerRB, targetRB, speed, steerer, crosshair, 1);
+    }
+
+}

@@ -1,0 +1,66 @@
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class Wander : Behavior
+{
+    Steerer steerer;
+    Vector3 steerDir;
+    Vector3 steerPoint;
+    float wanderTimeInterval = .25f;
+    float wanderStepInterval = 60f; //in degrees
+    Crosshair crosshair;
+
+    Rigidbody2D rb;
+
+    BehaviorHolder holder;
+
+    // Start is called before the first frame update
+    void Start()
+    {
+        holder = GetComponent<BehaviorHolder>();
+        rb = holder.RB;
+        crosshair = holder.Crosshair;
+        steerer = holder.Steerer;
+        steerDir = Vector3.up;
+        StartCoroutine(NewSteerDir());
+    }
+
+    public override void Behave(float weight)
+    {
+        steerPoint = transform.position + steerDir.normalized * weight;
+        //crosshair.SetPosition(steerPoint);
+        //holder.GiveForce(steerPoint - (transform.position + (Vector3)rb.velocity), weight);
+        Seek.DoSeek(holder, transform.position, steerPoint, rb, steerer, weight);
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+
+    }
+
+    public static Quaternion IncrementSteerDir (Vector3 steerDir, Rigidbody2D callerRB, float wanderStepInterval)
+    {
+
+        return Quaternion.Euler(0, 0, wanderStepInterval * Random.Range(-1f, 1f));
+    }
+
+    IEnumerator NewSteerDir ()
+    {
+        while (true)
+        {
+            for (int i = 0; i < 2; i++)
+            {
+                steerDir = IncrementSteerDir(steerDir, rb, wanderStepInterval) * steerDir;
+                yield return new WaitForSeconds(wanderTimeInterval);
+            }
+            //steerDir = IncrementSteerDir(steerDir, rb, 90f) * steerDir;
+            //yield return new WaitForSeconds(wanderTimeInterval);
+        }
+    }
+    //public static Vector3 FindWanderPoint(Vector3 callerPos, Vector3 steerDir,  Rigidbody2D callerRB, float wanderCircleRadius, float turnFactor)
+    //{
+        
+    //}
+}

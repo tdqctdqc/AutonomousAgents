@@ -1,0 +1,117 @@
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class BehaviorHolder : MonoBehaviour
+{
+    public List<Behavior> behaviors;
+    public Dictionary<Behavior, float> behaviorWeights;
+
+    public Seek seek;
+    public float seekWeight;
+
+    public Avoid avoid;
+    public float avoidWeight;
+
+    public Pursue pursue;
+    public float pursueWeight;
+
+    public Evade evade;
+    public float evadeWeight;
+
+    public Arrive arrive;
+    public float arriveWeight;
+
+    public PursueArrive pursueArrive;
+    public float pursueArriveWeight; 
+
+    public AvoidCollision avoidCollision;
+    public float avoidCollisionWeight;
+
+    public Wander wander;
+    public float wanderWeight;
+
+    Rigidbody2D rb;
+    public Rigidbody2D RB => rb;
+
+    Steerer steerer;
+    public Steerer Steerer => steerer;
+
+    Crosshair crosshair;
+    public Crosshair Crosshair => crosshair;
+
+    Target target;
+    public Target Target => target;
+
+    Rigidbody2D targetRB;
+    public Rigidbody2D TargetRB => targetRB;
+
+    Vector3 forceToAdd;
+    Vector3 cachedCrossHairPos; 
+
+    // Start is called before the first frame update
+    void Start()
+    {
+        forceToAdd = Vector3.zero;
+        cachedCrossHairPos = transform.position; 
+        seek = gameObject.AddComponent<Seek>();
+        avoid = gameObject.AddComponent<Avoid>();
+        pursue = gameObject.AddComponent<Pursue>();
+        arrive = gameObject.AddComponent<Arrive>();
+        pursueArrive = gameObject.AddComponent<PursueArrive>();
+        avoidCollision = gameObject.AddComponent<AvoidCollision>();
+        wander = gameObject.AddComponent<Wander>();
+
+        rb = GetComponent<Rigidbody2D>();
+        steerer = GetComponent<Steerer>();
+        crosshair = GetComponentInChildren<Crosshair>();
+        target = FindObjectOfType<Target>();
+        if (target != null)
+        {
+            targetRB = target.gameObject.GetComponent<Rigidbody2D>();
+        }
+
+        behaviorWeights = new Dictionary<Behavior, float>
+        {
+            {seek, seekWeight},
+            {avoid, avoidWeight},
+            {pursue, evadeWeight},
+            {arrive, arriveWeight},
+            {pursueArrive, pursueArriveWeight},
+            {avoidCollision, avoidCollisionWeight},
+            {wander, wanderWeight}
+        };
+
+        behaviors.Add(seek);
+        behaviors.Add(avoid);
+        behaviors.Add(pursue);
+        behaviors.Add(arrive);
+        behaviors.Add(pursueArrive);
+        behaviors.Add(avoidCollision);
+        behaviors.Add(wander);
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        foreach (Behavior behavior in behaviors)
+        {
+            if (behaviorWeights[behavior] > 0)
+            {
+                behavior.Behave(behaviorWeights[behavior]);
+            }
+        }
+        steerer.AddForce(forceToAdd);
+
+        Vector3 crosshairLerp = Vector3.Lerp(cachedCrossHairPos, transform.position + forceToAdd + (Vector3)rb.velocity, .1f);
+        crosshair.SetPosition(crosshairLerp);
+        cachedCrossHairPos = crosshairLerp; 
+        forceToAdd = Vector3.zero;
+    }
+
+
+    public void GiveForce(Vector3 force, float weight)
+    {
+        forceToAdd += force.normalized * weight; 
+    }
+}

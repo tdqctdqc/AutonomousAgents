@@ -1,0 +1,43 @@
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class Arrive : Behavior
+{
+    Target target;
+    Rigidbody2D rb;
+    Steerer steerer;
+    public float maxSpeed = 5f;
+    public float slowingDistance;
+    BehaviorHolder holder;
+
+    // Start is called before the first frame update
+    void Start()
+    {
+
+        holder = GetComponent<BehaviorHolder>();
+        target = holder.Target;
+        rb = holder.RB;
+        steerer = holder.Steerer;
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+    }
+
+    public override void Behave(float weight)
+    {
+        if (target != null)
+        {
+            DoArrive(holder, transform.position, target.transform.position, rb, steerer, weight, slowingDistance);
+        }
+        
+    }
+    public static void DoArrive (BehaviorHolder holder, Vector3 callerPos, Vector3 targetPos, Rigidbody2D callerRB, Steerer steerer, float speed, float slowingDist)
+    {
+        float clippedSpeed = Methods.ScaleSpeedWithDistance(callerPos, targetPos, speed, slowingDist);
+        Seek.DoSeek(holder, callerPos, targetPos, callerRB, steerer, clippedSpeed);
+    }
+
+}
